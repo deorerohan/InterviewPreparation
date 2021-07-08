@@ -14,6 +14,30 @@ from rich.syntax import Syntax
 from rich.table import Table
 from rich.text import Text
 
+import itertools
+
+
+class Task:
+    newid = itertools.count()
+
+    def __init__(self, task, reminderDate) -> None:
+
+        self.taskID = next(Task.newid)
+        self.taskText = task
+        self.reminder = reminderDate
+        self.tags = list()
+        self.notes = ""
+
+    def SetTag(self, tag):
+        self.tags.append(tag)
+
+    def AppendNote(self, note):
+        self.notes += f"\n{note}"
+
+    def CreatePanel(self):
+        textToShow = f"{self.taskID}. {self.taskText} \n{self.reminder}"
+        return Panel(textToShow)
+
 
 class TaskApp:
     def make_layout(self) -> Layout:
@@ -26,53 +50,33 @@ class TaskApp:
         )
         layout["main"].split_row(
             Layout(name="side"),
-            Layout(name="body", ratio=2, minimum_size=60),
+            Layout(name="body", ratio=3, minimum_size=60),
         )
         layout["side"].split(Layout(name="box1"), Layout(name="box2"))
         return layout
 
     def make_sponsor_message(self) -> Panel:
         """Some example content."""
-        sponsor_message = Table.grid(padding=1)
-        sponsor_message.add_column(style="green", justify="right")
-        sponsor_message.add_column(no_wrap=True)
-        sponsor_message.add_row(
-            "Sponsor me",
-            "[u blue link=https://github.com/sponsors/willmcgugan]https://github.com/sponsors/willmcgugan",
+        table = Table(title="Star Wars Movies", expand=True, show_edge=False)
+
+        table.add_column("Released", justify="right", style="cyan", no_wrap=True)
+        table.add_column("Title", style="magenta")
+        table.add_column("Box Office", style="green")
+
+        table.add_row(
+            "Dec 20, 2019", "Star Wars: The Rise of Skywalker", "$952,110,690"
         )
-        sponsor_message.add_row(
-            "Buy me a :coffee:",
-            "[u blue link=https://ko-fi.com/willmcgugan]https://ko-fi.com/willmcgugan",
-        )
-        sponsor_message.add_row(
-            "Twitter",
-            "[u blue link=https://twitter.com/willmcgugan]https://twitter.com/willmcgugan",
-        )
-        sponsor_message.add_row(
-            "Blog",
-            "[u blue link=https://www.willmcgugan.com]https://www.willmcgugan.com",
+        table.add_row("May 25, 2018", "Solo: A Star Wars Story", "$393,151,347")
+        table.add_row(
+            "Dec 15, 2017", "Star Wars Ep. V111: The Last Jedi", "$1,332,539,889"
         )
 
-        intro_message = Text.from_markup(
-            """Consider supporting my work via Github Sponsors (ask your company / organization), or buy me a coffee to say thanks. - Will McGugan"""
+        myTask1 = Task("This is my first task", None)
+        myTask2 = Task("This is my second task", None)
+        table.add_row(
+            myTask1.CreatePanel(), "Dec 16, 2016", myTask2.CreatePanel()
         )
-
-        message = Table.grid(padding=1)
-        message.add_column()
-        message.add_column(no_wrap=True)
-        message.add_row(intro_message, sponsor_message)
-
-        message_panel = Panel(
-            Align.center(
-                RenderGroup(intro_message, "\n", Align.center(sponsor_message)),
-                vertical="middle",
-            ),
-            box=box.ROUNDED,
-            padding=(1, 2),
-            title="[b red]Thanks for trying out Rich!",
-            border_style="bright_blue",
-        )
-        return message_panel
+        return Panel(table)
 
     def Header(self) -> Panel:
         """Display header with clock."""
@@ -85,45 +89,15 @@ class TaskApp:
         )
         return Panel(grid, style="white on blue")
 
-    def make_syntax(self) -> Syntax:
-        code = """\
-    def ratio_resolve(total: int, edges: List[Edge]) -> List[int]:
-        sizes = [(edge.size or None) for edge in edges]
-        # While any edges haven't been calculated
-        while any(size is None for size in sizes):
-            # Get flexible edges and index to map these back on to sizes list
-            flexible_edges = [
-                (index, edge)
-                for index, (size, edge) in enumerate(zip(sizes, edges))
-                if size is None
-            ]
-            # Remaining space in total
-            remaining = total - sum(size or 0 for size in sizes)
-            if remaining <= 0:
-                # No room for flexible edges
-                sizes[:] = [(size or 0) for size in sizes]
-                break
-            # Calculate number of characters in a ratio portion
-            portion = remaining / sum((edge.ratio or 1) for _, edge in flexible_edges)
-            # If any edges will be less than their minimum, replace size with the minimum
-            for index, edge in flexible_edges:
-                if portion * edge.ratio <= edge.minimum_size:
-                    sizes[index] = edge.minimum_size
-                    break
-            else:
-                # Distribute flexible space and compensate for rounding error
-                # Since edge sizes can only be integers we need to add the remainder
-                # to the following line
-                _modf = modf
-                remainder = 0.0
-                for index, edge in flexible_edges:
-                    remainder, size = _modf(portion * edge.ratio + remainder)
-                    sizes[index] = int(size)
-                break
-        # Sizes now contains integers only
-        return cast(List[int], sizes)
+    def make_syntax(self) -> Panel:
+        code = """#Instructions
+
+This will have some instructions like:
+- make list
+- some more list
+- and more
         """
-        syntax = Syntax(code, "python", line_numbers=True)
+        syntax = Panel(code, border_style="green")
         return syntax
 
     job_progress = Progress(
@@ -156,12 +130,12 @@ class TaskApp:
         layout = self.make_layout()
         layout["header"].update(self.Header())
         layout["body"].update(self.make_sponsor_message())
-        layout["box2"].update(Panel(self.make_syntax(), border_style="green"))
+        layout["box2"].update(self.make_syntax())
         layout["box1"].update(Panel(layout.tree, border_style="red"))
 
-
-        console.print(layout)
-        console.input()
+        while True:
+            console.print(layout)
+            usr_input = console.input()
 
 
 if __name__ == "__main__":
