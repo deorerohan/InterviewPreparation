@@ -5,7 +5,7 @@
 - Recursive Bubble Sort
 - Insertion Sort
 - Recursive Insertion Sort
-- Merge Sort
+- Merge Sort : Need to practice
 - Iterative Merge Sort
 - Quick Sort
 - Iterative Quick Sort
