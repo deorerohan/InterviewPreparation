@@ -16,6 +16,8 @@ public partial class MainWindow : Gtk.Window
 
     protected void OnButton1Clicked(object sender, EventArgs e)
     {
-
+        var messageDlg = new MessageDialog(this, DialogFlags.DestroyWithParent, MessageType.Info, ButtonsType.Ok, "Message to be displayed");
+        messageDlg.Run();
+        messageDlg.Destroy();
     }
 }
