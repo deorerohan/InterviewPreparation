@@ -33,6 +33,28 @@ class Graph:
 
             print(" \n")
 
+    def BreadthFirstSeach(self, s):
+        visited = [False] * self.V
+
+        queue = list()
+        visited[s] = True
+        queue.append(s)
+
+        while (len(queue) != 0):
+            s = queue[0]
+            print(f"{s} ", end="")
+
+            queue.pop(0)
+
+            for i in range(len(self.graph)):
+                if not visited[i]:
+                    visited[i] = True
+                    queue.append(i)
+        
+
+
+        
+
 if __name__ == "__main__":
     V = 5
     graph = Graph(V)
@@ -46,3 +68,4 @@ if __name__ == "__main__":
     graph.add_edge(3, 4)
 
     graph.print_graph()
+    graph.BreadthFirstSeach(2)
